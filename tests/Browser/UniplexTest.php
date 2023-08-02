@@ -16,14 +16,49 @@ class UniplexTest extends DuskTestCase
     public function testLogin(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
-                    ->type('email', '01730785310')
+
+            $json = file_get_contents(resource_path('test_data/login_credentials.json'));
+            $login_credentials = json_decode($json, true);
+
+            $browser->visit('/');
+
+            foreach ($login_credentials as $login_credential){
+                $browser
+                    ->click('#mui-1')
                     ->pause(2000)
-                    ->type('password', 'SWTesting2023')
+                    ->keys('#mui-1', ['{backspace}'])
+                    ->pause(2000)
+                    ->click('#mui-2')
+                    ->keys('#mui-2', ['{backspace}'])
+                    ->pause(2000)
+                    ->type('email', $login_credential['email'])
+                    ->clear('#mui-2')
+                    ->pause(2000)
+                    ->type('password', $login_credential['password'])
                     ->pause(2000)
                     ->press('Login')
-                    ->pause(3000)
-                    ->assertSee('Raiyan');
+                    ->pause(2000);
+
+                if($login_credential['email'] === '01730785310' && $login_credential['password'] === 'SWTesting2023'){
+                    $assertion = 'Welcome';
+                }else{
+                    $assertion = 'Powerful & Customizable Education ERP';
+                }
+
+                $browser
+                    ->assertSee($assertion)
+                    ->pause(2000);
+
+                if($assertion === 'Welcome'){
+                    $browser
+                        ->click('button.muiltr-19kdti')
+                        ->pause(2000)
+                        ->click("li.MuiMenuItem-root:nth-child(3) > div:nth-child(2) > span:nth-child(1)")
+                        ->pause(2000)
+                        ->assertUrlIs('https://uniplex.mist.ac.bd/login')
+                    ;
+                }
+            }
         });
 
     }
