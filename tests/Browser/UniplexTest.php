@@ -16,12 +16,10 @@ class UniplexTest extends DuskTestCase
     public function testLogin(): void
     {
         $this->browse(function (Browser $browser) {
-
             $json = file_get_contents(resource_path('test_data/login_credentials.json'));
             $login_credentials = json_decode($json, true);
 
             $browser->visit('/');
-
             foreach ($login_credentials as $login_credential){
                 $browser
                     ->click('#mui-1')
@@ -39,14 +37,9 @@ class UniplexTest extends DuskTestCase
                     ->press('Login')
                     ->pause(2000);
 
-                if($login_credential['email'] === '01730785310' && $login_credential['password'] === 'SWTesting2023'){
-                    $assertion = 'Welcome';
-                }else{
-                    $assertion = 'Powerful & Customizable Education ERP';
-                }
-
-                $browser
-                    ->assertSee($assertion)
+                $assertion = $login_credential['email'] === '01730785310' && $login_credential['password'] === 'SWTesting2023'
+                                ? 'Welcome' : 'Powerful & Customizable Education ERP';
+                $browser->assertSee($assertion)
                     ->pause(2000);
 
                 if($assertion === 'Welcome'){
@@ -55,12 +48,10 @@ class UniplexTest extends DuskTestCase
                         ->pause(2000)
                         ->click("li.MuiMenuItem-root:nth-child(3) > div:nth-child(2) > span:nth-child(1)")
                         ->pause(2000)
-                        ->assertUrlIs('https://uniplex.mist.ac.bd/login')
-                    ;
+                        ->assertUrlIs('https://uniplex.mist.ac.bd/login');
                 }
             }
         });
-
     }
 
     public function testFailedLogin(): void
@@ -181,9 +172,9 @@ class UniplexTest extends DuskTestCase
                 ->pause(2000)
                 ->press('Login')
                 ->pause(3000)
-                ->click('span.MuiListItemText-primary[text="Supplementary Term"]')
+                ->click('ul.muiltr-16hrwgb:nth-child(9) > li:nth-child(1)')
                 ->pause(2000)
-                ->click('a.MuiListItem-button[href="/semester/supplementary-course-offer"]')
+                ->click('ul.open:nth-child(9) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a:nth-child(1)')
                 ->pause(2000)
                 ->assertSee('Course Offering (Supplementary)')
             ;
@@ -281,6 +272,37 @@ class UniplexTest extends DuskTestCase
                 ->assertSee('OBE Configuration')
                 ;
 
+        });
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function testStudent(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                ->type('email', '01730785310')
+                ->pause(2000)
+                ->type('password', 'SWTesting2023')
+                ->pause(2000)
+                ->press('Login')
+                ->pause(3000)
+                ->click('ul.muiltr-16hrwgb:nth-child(14) > li:nth-child(1)')
+                ->pause(2000)
+                ->click('.MuiCollapse-entered > div:nth-child(1) > div:nth-child(1) > a:nth-child(1)')
+                ->pause(3000)
+                ->type('filterText','201914052')
+                ->pause(2000)
+                ->press('Filter')
+                ->pause(3000)
+                ->assertSee('Zariful Islam')
+                ->click('.MuiTableRow-hover')
+                ->pause(2000)
+                ->press('Results History')
+                ->pause(2000)
+                ->assertSeeIn('div.muiltr-4cxybv:nth-child(1) > div:nth-child(2) > table:nth-child(1) > tbody:nth-child(2) > tr:nth-child(5) > td:nth-child(4) > div:nth-child(1)', 'F')
+            ;
         });
     }
 }
