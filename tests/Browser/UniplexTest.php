@@ -305,4 +305,169 @@ class UniplexTest extends DuskTestCase
             ;
         });
     }
+
+    public function testCourseOffering(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                ->type('email', '01730785310')
+                ->pause(2000)
+                ->type('password', 'SWTesting2023')
+                ->pause(2000)
+                ->press('Login')
+                ->pause(3000)
+                ->click('ul.muiltr-16hrwgb:nth-child(9) > li:nth-child(1)')
+                ->pause(2000)
+                ->click('ul.open:nth-child(9) > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a:nth-child(1)')
+                ->pause(2000)
+                ->click('tr.MuiTableRow-hover:nth-child(1)')
+                ->pause(2000)
+                ->assertSee('Course Offering (Supplementary)')
+                ->type('filterText','201914019')
+                ->pause(2000)
+                ->click('div.MuiGrid-grid-xs-4:nth-child(2) > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1)')
+                ->pause(2000)
+                ->click('li.MuiMenuItem-root:nth-child(2)')
+                ->pause(2000)
+                ->press('Filter')
+                ->pause(3000)
+                ->assertSee('Fahim Shahryer')
+                ->click('td.nowrap:nth-child(2) > a:nth-child(1)')
+                ->pause(2000)
+                ->assertSee('Registration is closed for this semester')
+            ;
+        });
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function testAttendance(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                ->type('email', '01730785310')
+                ->pause(2000)
+                ->type('password', 'SWTesting2023')
+                ->pause(2000)
+                ->press('Login')
+                ->pause(3000)
+                ->clickLink('My Courses')
+                ->pause(2000)
+                ->click('tr.MuiTableRow-root:nth-child(2)')
+                ->pause(4000)
+                ->assertSee('Data Structures')
+                ->click('tr.MuiTableRow-hover:nth-child(1)')
+                ->pause(2000);
+
+            // Collect all tabs and grab the last one (recently opened).
+            $window = collect($browser->driver->getWindowHandles())->last();
+
+            // Switch to the new tab
+            $browser->driver->switchTo()->window($window);
+
+            $browser
+                ->press('Attendance')
+                ->pause(6000)
+                ->with('.custom_table > tbody:nth-child(2) > tr:nth-child(1)', function ($row) use($browser){
+                    $tdElements = $row->elements('td');
+
+                    $presentCount = 0;
+                    foreach ($tdElements as $td) {
+                        // Check if the text of the <td> contains "P"
+                        if (str_contains($td->getText(), 'P')) {
+                            $presentCount++;
+                        }
+                    }
+
+                    // Output the count (you can also assert the count based on your requirements)
+                    echo "Count of 'P': $presentCount";
+
+                    $browser->script("document.querySelector('.custom_table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(51)').scrollIntoView({ block: 'end', inline: 'end', behavior: 'smooth' });");
+                    $browser->pause(6000);
+
+                    $attendanceCount = $browser->driver->executeScript("
+                        return document.querySelector('.custom_table > tbody:nth-child(2) > tr:nth-child(1) > td:nth-child(51)').innerText;
+                    ");
+                    $this->assertEquals($presentCount, (int)$attendanceCount, "The count doesn't match!");
+                })
+            ;
+        });
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function testAttendanceUnlock(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                ->type('email', '01730785310')
+                ->pause(2000)
+                ->type('password', 'SWTesting2023')
+                ->pause(2000)
+                ->press('Login')
+                ->pause(3000)
+                ->clickLink('My Courses')
+                ->pause(2000)
+                ->click('tr.MuiTableRow-root:nth-child(2)')
+                ->pause(4000)
+                ->assertSee('Data Structures')
+                ->click('tr.MuiTableRow-hover:nth-child(1)')
+                ->pause(2000);
+
+            // Collect all tabs and grab the last one (recently opened).
+            $window = collect($browser->driver->getWindowHandles())->last();
+
+            // Switch to the new tab
+            $browser->driver->switchTo()->window($window);
+
+            $browser
+                ->press('Attendance')
+                ->pause(6000)
+                ->click('.custom_table > thead:nth-child(1) > tr:nth-child(3) > td:nth-child(4) > div:nth-child(1) > div:nth-child(1) > button:nth-child(1)')
+                ->pause(2000)
+                ->type('remarks', 'Please unlock I am begging you')
+                ->pause(3000)
+                ->click('button.MuiLoadingButton-root:nth-child(2)')
+                ->pause(4000)
+                ->assertSee('Unlock request submitted successfully.')
+            ;
+        });
+    }
+
+    /**
+     * @throws \Throwable
+     */
+    public function testRoutine(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/')
+                ->type('email', '01730785310')
+                ->pause(2000)
+                ->type('password', 'SWTesting2023')
+                ->pause(2000)
+                ->press('Login')
+                ->pause(3000)
+                ->clickLink('My Courses')
+                ->pause(2000)
+                ->click('tr.MuiTableRow-root:nth-child(2)')
+                ->pause(4000)
+                ->assertSee('Data Structures')
+                ->click('tr.MuiTableRow-hover:nth-child(1)')
+                ->pause(2000);
+
+            // Collect all tabs and grab the last one (recently opened).
+            $window = collect($browser->driver->getWindowHandles())->last();
+
+            // Switch to the new tab
+            $browser->driver->switchTo()->window($window);
+
+            $browser
+                ->press('Class Routine')
+                ->pause(6000)
+                ->assertSee('Saturday');
+
+        });
+    }
 }
